@@ -1,6 +1,5 @@
 #ifndef TQDM_H
 #define TQDM_H
-#include <unistd.h>
 #include <chrono>
 #include <ctime>
 #include <numeric>
@@ -29,9 +28,6 @@ class tqdm {
 
         std::vector<const char*> bars = {" ", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█"};
 
-        bool in_screen = (system("test $STY") == 0);
-        bool in_tmux = (system("test $TMUX") == 0);
-        bool is_tty = isatty(1);
         bool use_colors = true;
         bool color_transition = true;
         int width = 40;
@@ -61,15 +57,6 @@ class tqdm {
         }
 
     public:
-        tqdm() {
-            if (in_screen) {
-                set_theme_basic();
-                color_transition = false;
-            } else if (in_tmux) {
-                color_transition = false;
-            }
-        }
-
         void reset() {
             t_first = std::chrono::system_clock::now();
             t_old = std::chrono::system_clock::now();
@@ -88,7 +75,7 @@ class tqdm {
         void set_theme_braille_spin() { bars = {" ", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠇", "⠿" }; }
         void set_theme_vertical() { bars = {"▁", "▂", "▃", "▄", "▅", "▆", "▇", "█", "█"}; }
         void set_theme_basic() {
-            bars = {" ", " ", " ", " ", " ", " ", " ", " ", "#"}; 
+            bars = {" ", " ", " ", " ", " ", " ", " ", " ", "#"};
             right_pad = "|";
         }
         void set_label(std::string label_) { label = label_; }
@@ -103,7 +90,7 @@ class tqdm {
             fflush(stdout);
         }
         void progress(int curr, int tot) {
-            if(is_tty && (curr%period == 0)) {
+            if(curr%period == 0) {
                 total_ = tot;
                 nupdates++;
                 auto now = std::chrono::system_clock::now();
@@ -160,7 +147,7 @@ class tqdm {
                     }
                 }
                 for (int i = 0; i < ifills; i++) std::cout << bars[8];
-                if (!in_screen and (curr != tot)) printf("%s",bars[(int)(8.0*(fills-ifills))]);
+                if (curr != tot) printf("%s",bars[(int)(8.0*(fills-ifills))]);
                 for (int i = 0; i < width-ifills-1; i++) std::cout << bars[0];
                 printf("%s ", right_pad.c_str());
                 if (use_colors) printf("\033[1m\033[31m");
