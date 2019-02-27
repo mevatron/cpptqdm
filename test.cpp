@@ -1,5 +1,7 @@
 #include "tqdm.h"
 
+#include <unistd.h>
+
 int main() {
 
     int N = 2000;
