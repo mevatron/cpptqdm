@@ -38,8 +38,8 @@ class tqdm {
         void hsv_to_rgb(float h, float s, float v, int& r, int& g, int& b) {
             if (s < 1e-6) {
                 v *= 255.;
-                r = static_cast< int >( v ); 
-                g = static_cast< int >( v ); 
+                r = static_cast< int >( v );
+                g = static_cast< int >( v );
                 b = static_cast< int >( v );
             }
             int i = (int)(h*6.0);
@@ -84,39 +84,39 @@ class tqdm {
             right_pad = "|";
         }
 
-        void set_theme_line() { 
+        void set_theme_line() {
 #ifdef _WIN32
             set_theme_basic();
 #else
-            bars = {"─", "─", "─", "╾", "╾", "╾", "╾", "━", "═"}; 
+            bars = {"─", "─", "─", "╾", "╾", "╾", "╾", "━", "═"};
 #endif
         }
-        void set_theme_circle() { 
+        void set_theme_circle() {
 #ifdef _WIN32
             set_theme_basic();
 #else
-            bars = {" ", "◓", "◑", "◒", "◐", "◓", "◑", "◒", "#"}; 
-#endif()
-        }
-        void set_theme_braille() { 
-#ifdef _WIN32
-            set_theme_basic();
-#else
-            bars = {" ", "⡀", "⡄", "⡆", "⡇", "⡏", "⡟", "⡿", "⣿" }; 
+            bars = {" ", "◓", "◑", "◒", "◐", "◓", "◑", "◒", "#"};
 #endif
         }
-        void set_theme_braille_spin() { 
+        void set_theme_braille() {
 #ifdef _WIN32
             set_theme_basic();
 #else
-            bars = {" ", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠇", "⠿" }; 
+            bars = {" ", "⡀", "⡄", "⡆", "⡇", "⡏", "⡟", "⡿", "⣿" };
 #endif
         }
-        void set_theme_vertical() { 
+        void set_theme_braille_spin() {
 #ifdef _WIN32
             set_theme_basic();
 #else
-            bars = {"▁", "▂", "▃", "▄", "▅", "▆", "▇", "█", "█"}; 
+            bars = {" ", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠇", "⠿" };
+#endif
+        }
+        void set_theme_vertical() {
+#ifdef _WIN32
+            set_theme_basic();
+#else
+            bars = {"▁", "▂", "▃", "▄", "▅", "▆", "▇", "█", "█"};
 #endif
         }
 
