@@ -1,6 +1,16 @@
 #include "tqdm.h"
 
+#ifdef _MSC_VER
+#include <windows.h>
+#else
 #include <unistd.h>
+#endif
+
+#ifdef _MSC_VER
+static void usleep(int us) {
+    Sleep(us/1000);
+}
+#endif
 
 int main() {
 
