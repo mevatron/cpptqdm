@@ -26,7 +26,11 @@ class tqdm {
         bool use_ema = true;
         float alpha_ema = 0.1f;
 
+#ifdef _MSC_VER
         std::vector<const char*> bars = {u8" ", u8"▏", u8"▎", u8"▍", u8"▌", u8"▋", u8"▊", u8"▉", u8"█"};
+#else
+        std::vector<const char*> bars = {" ", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█"};
+#endif
 
         bool use_colors = true;
         bool color_transition = true;
