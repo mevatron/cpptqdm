@@ -7,8 +7,8 @@
 #include <string>
 #include <cstdlib>
 #include <iostream>
+#include <utility>
 #include <vector>
-#include <math.h>
 #include <algorithm>
 
 class tqdm {
@@ -35,21 +35,21 @@ class tqdm {
         std::string right_pad = "▏";
         std::string label = "";
 
-        void hsv_to_rgb(float h, float s, float v, int& r, int& g, int& b) {
+        static void hsv_to_rgb(float h, float s, float v, int& r, int& g, int& b) {
             if (s < 1e-6) {
                 v *= 255.;
                 r = static_cast< int >( v );
                 g = static_cast< int >( v );
                 b = static_cast< int >( v );
             }
-            int i = (int)(h*6.0);
-            float f = (h*6.f)-i;
-            int p = (int)(255.0*(v*(1.-s)));
-            int q = (int)(255.0*(v*(1.-s*f)));
-            int t = (int)(255.0*(v*(1.-s*(1.-f))));
+            int i = static_cast<int>(h * 6.0);
+            const float f = (h*6.f)-static_cast<float>(i);
+            const int p = static_cast<int>(255.0 * (v * (1. - s)));
+            const int q = static_cast<int>(255.0 * (v * (1. - s * f)));
+            const int t = static_cast<int>(255.0 * (v * (1. - s * (1. - f))));
             v *= 255;
             i %= 6;
-            int vi = (int)v;
+            const int vi = static_cast<int>(v);
             if (i == 0)      { r = vi; g = t;  b = p;  }
             else if (i == 1) { r = q;  g = vi; b = p;  }
             else if (i == 2) { r = p;  g = vi; b = t;  }
@@ -61,7 +61,7 @@ class tqdm {
     public:
 #ifdef _WIN32
         tqdm() noexcept :
-            use_colors( false )
+            use_colors( true )
         {
             set_theme_basic();
         }
@@ -80,20 +80,20 @@ class tqdm {
         }
 
         void set_theme_basic() {
-            bars = { " ", " ", " ", " ", " ", " ", " ", " ", "#" };
+            bars = { " ", "\\", "-", "/", "|", "\\", "-", "/", "|" };
             right_pad = "|";
         }
 
         void set_theme_line() {
 #ifdef _WIN32
-            set_theme_basic();
+            bars = { " ", "_", "_", "_", "-", "-", "-", "-", "=" };
 #else
             bars = {"─", "─", "─", "╾", "╾", "╾", "╾", "━", "═"};
 #endif
         }
         void set_theme_circle() {
 #ifdef _WIN32
-            set_theme_basic();
+            bars = { " ", ".", ".", ".", "o", "o", "o", "o", "O" };
 #else
             bars = {" ", "◓", "◑", "◒", "◐", "◓", "◑", "◒", "#"};
 #endif
@@ -114,13 +114,13 @@ class tqdm {
         }
         void set_theme_vertical() {
 #ifdef _WIN32
-            set_theme_basic();
+            bars = { " ", ".", ".", ".", ":", ":", ":", ":", "|" };
 #else
             bars = {"▁", "▂", "▃", "▄", "▅", "▆", "▇", "█", "█"};
 #endif
         }
 
-        void set_label(std::string label_) { label = label_; }
+        void set_label(std::string label_) { label = std::move(label_); }
         void disable_colors() {
             color_transition = false;
             use_colors = false;
@@ -131,14 +131,14 @@ class tqdm {
             printf("\n");
             fflush(stdout);
         }
-        void progress(int curr, int tot) {
+        void progress(int curr, const int tot) {
             if(curr%period == 0) {
                 total_ = tot;
                 nupdates++;
-                auto now = std::chrono::system_clock::now();
-                double dt = ((std::chrono::duration<double>)(now - t_old)).count();
-                double dt_tot = ((std::chrono::duration<double>)(now - t_first)).count();
-                int dn = curr - n_old;
+                const auto now = std::chrono::system_clock::now();
+                const double dt = static_cast<std::chrono::duration<double>>(now - t_old).count();
+                const double dt_tot = static_cast<std::chrono::duration<double>>(now - t_first).count();
+                const int dn = curr - n_old;
                 n_old = curr;
                 t_old = now;
                 if (deq_n.size() >= smoothing) deq_n.erase(deq_n.begin());
@@ -146,7 +146,7 @@ class tqdm {
                 deq_t.push_back(dt);
                 deq_n.push_back(dn);
 
-                double avgrate = 0.;
+                double avgrate;
                 if (use_ema) {
                     avgrate = deq_n[0] / deq_t[0];
                     for (unsigned int i = 1; i < deq_t.size(); i++) {
@@ -154,19 +154,19 @@ class tqdm {
                         avgrate = alpha_ema*r + (1.0-alpha_ema)*avgrate;
                     }
                 } else {
-                    double dtsum = std::accumulate(deq_t.begin(),deq_t.end(),0.);
-                    int dnsum = std::accumulate(deq_n.begin(),deq_n.end(),0);
+	                const double dtsum = std::accumulate(deq_t.begin(),deq_t.end(),0.);
+	                const int dnsum = std::accumulate(deq_n.begin(),deq_n.end(),0);
                     avgrate = dnsum/dtsum;
                 }
 
                 // learn an appropriate period length to avoid spamming stdout
                 // and slowing down the loop, shoot for ~25Hz and smooth over 3 seconds
                 if (nupdates > 10) {
-                    period = (int)( std::min(std::max((1.0/25)*curr/dt_tot,1.0), 5e5));
+                    period = static_cast<int>(std::min(std::max((1.0 / 25) * curr / dt_tot, 1.0), 5e5));
                     smoothing = 25*3;
                 }
                 double peta = (tot-curr)/avgrate;
-                double pct = (double)curr/(tot*0.01);
+                double pct = static_cast<double>(curr)/(tot*0.01);
                 if( ( tot - curr ) <= period ) {
                     pct = 100.0;
                     avgrate = tot/dt_tot;
@@ -174,8 +174,8 @@ class tqdm {
                     peta = 0;
                 }
 
-                double fills = ((double)curr / tot * width);
-                int ifills = (int)fills;
+                const double fills = (static_cast<double>(curr) / tot * width);
+                const int ifills = static_cast<int>(fills);
 
                 printf("\015 ");
                 if (use_colors) {

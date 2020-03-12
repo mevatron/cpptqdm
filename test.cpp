@@ -2,13 +2,14 @@
 
 #ifdef _MSC_VER
 #include <windows.h>
+#include <thread>
 #else
 #include <unistd.h>
 #endif
 
 #ifdef _MSC_VER
-static void usleep(int us) {
-    Sleep(us/1000);
+static void usleep(int usec) {
+    std::this_thread::sleep_for(std::chrono::microseconds(usec));
 }
 #endif
 
@@ -18,8 +19,8 @@ int main() {
     tqdm bar;
 
     std::cout << "Overhead of loop only:" << std::endl;
-    for(int i = 0; i < 100000000; i++) {
-        bar.progress(i, 100000000);
+    for(int i = 0; i < N; i++) {
+        bar.progress(i, N);
     }
     bar.finish();
 
@@ -29,7 +30,6 @@ int main() {
     bar.set_theme_basic();
     for(int i = 0; i < N; i++) {
         bar.progress(i, N);
-        usleep(1000);
     }
     bar.finish();
 
@@ -38,7 +38,6 @@ int main() {
     bar.set_theme_braille();
     for(int i = 0; i < N; i++) {
         bar.progress(i, N);
-        usleep(3000);
     }
     bar.finish();
 
@@ -47,7 +46,6 @@ int main() {
     bar.set_theme_line();
     for(int i = 0; i < N; i++) {
         bar.progress(i, N);
-        usleep(3000);
     }
     bar.finish();
 
@@ -56,7 +54,6 @@ int main() {
     bar.set_theme_circle();
     for(int i = 0; i < N; i++) {
         bar.progress(i, N);
-        usleep(3000);
     }
     bar.finish();
 
@@ -66,7 +63,6 @@ int main() {
     bar.set_theme_vertical();
     for(int i = 0; i < N; i++) {
         bar.progress(i, N);
-        usleep(3000);
     }
     bar.finish();
 
